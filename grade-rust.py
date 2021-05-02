@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Do basic Rust HW tests
 
-import argparse, json, os, pygit2, shutil, subprocess, toml
+import argparse, json, os, pygit2, shutil, subprocess, sys, toml
 from pathlib import Path
 
 ap = argparse.ArgumentParser("Grade a Rust assignment.")
@@ -48,19 +48,23 @@ def clean():
 
 def merge_to(src, dest):
     for key, val in src.items():
-        if type(val) is dict:
-            if key in dest:
-                dest[key] |= val
-            else:
-                dest[key] = val
-        elif type(val) is list:
+        if key == "dev-dependencies":
+            assert type(val) is dict
+            if key not in dest:
+                dest[key] = dict()
+            for subkey, subval in val.items():
+                if "dependencies" in dest and subkey in dest["dependencies"]:
+                    dest["dependencies"][subkey] = subval
+                else:
+                    dest[key][subkey] = val
+        elif key == "test":
+            assert type(val) is list
             if key in dest:
                 dest[key] += val
             else:
                 dest[key] = val
         else:
-            print(type(val))
-            assert False
+            print(f"test Cargo.toml: key {key} ignored", file=sys.stderr)
 
 def rewrite_cargo_toml(tests):
     cml = toml.load("Cargo.toml")
