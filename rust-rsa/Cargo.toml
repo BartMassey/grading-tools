@@ -1,5 +1,5 @@
 [dev-dependencies]
-rand = "*"
+rand = "0.8"
 
 [[test]]
 name = "grading-tests"

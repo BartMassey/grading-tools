@@ -1,5 +1,3 @@
-#![allow(non_snake_case)]
-
 use rand::Rng;
 
 use toy_rsa::*;
@@ -23,9 +21,9 @@ fn test_rsa_random() {
     let mut rng = rand::thread_rng();
     for _ in 0..100 {
         let plain = rng.gen_range(0..u32::max_value());
-        let (p, q) = toy_rsa::genkey();
-        let cipher = toy_rsa::encrypt(p as u64 * q as u64, plain);
-        let decrypted = toy_rsa::decrypt((p, q), cipher);
+        let (p, q) = genkey();
+        let cipher = encrypt(p as u64 * q as u64, plain);
+        let decrypted = decrypt((p, q), cipher);
         assert_eq!(plain, decrypted);
     }
 }
