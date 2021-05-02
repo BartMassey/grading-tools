@@ -11,5 +11,15 @@ from Moodle.
 * `sound-clipped/`: Checkers for Sound `clipped` homework.
 * `grade-rust.py`: General sanity checker for Rust crates.
 
+## Grading Rust Programs
+
+Use
+
+    python3 <grading-tools>/grade-rust.py -t <grading-tools>/rust-rsa
+
+where `<grading-tools>` is the path to this repo.
+
 Note that `grade-rust.py` will potentially edit the Rust
-project directory that it is run in to add tests.
+project directory that it is run in to add tests. Use the
+`-c` flag to `grade-rust.py` to have the student work
+git-committed before and after these edits.

@@ -1,13 +1,18 @@
 #!/usr/bin/python3
 # Do basic Rust HW tests
 
-import argparse, json, os, shutil, subprocess, toml
+import argparse, json, os, pygit2, shutil, subprocess, toml
 from pathlib import Path
 
 ap = argparse.ArgumentParser("Grade a Rust assignment.")
 ap.add_argument(
     "-t", "--tests",
     help = "file of tests to run with student's assignment",
+)
+ap.add_argument(
+    "-c", "--commit",
+    help = "make a git repo and commit before editing student work",
+    action = "store_true",
 )
 args = ap.parse_args()
 
@@ -75,7 +80,36 @@ def run_grading_tests(tests):
         filtered=run_tests,
     )
 
+
+def git_commit(message):
+    repo_path = pygit2.discover_repository(os.getcwd())
+    if repo_path is None:
+        repo = pygit2.init_repository(".")
+    else:
+        repo = pygit2.Repository(repo_path)
+    index = repo.index
+    index.add_all()
+    index.write()
+    author = pygit2.Signature('Rust Grading', 'bart@cs.pdx.edu')
+    committer = pygit2.Signature('Rust Grading', 'bart@cs.pdx.edu')
+    tree = index.write_tree()
+    if repo.head_is_unborn:
+        parent = []
+    else:
+        parent = [repo.head.target]
+    commit = repo.create_commit(
+        'HEAD',
+        author,
+        committer,
+        message,
+        tree,
+        parent
+    )
+    index.write()
+
 clean()
+if args.commit:
+    git_commit('student homework assignment')
 round("rustfmt", "cargo fmt -- --check")
 round("clippy", "cargo clippy -q -- -D warnings")
 round(
@@ -85,4 +119,6 @@ round(
 )
 if args.tests:
     run_grading_tests(args.tests)
+if args.commit:
+    git_commit('added grading stuff')
 clean()
