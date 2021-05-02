@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Do basic Rust HW tests
 
-import argparse, json, shutil, subprocess
+import argparse, json, os, shutil, subprocess, toml
 from pathlib import Path
 
 ap = argparse.ArgumentParser("Grade a Rust assignment.")
@@ -41,21 +41,48 @@ def round(name, cmd, filtered=None):
 def clean():
     subprocess.run("cargo clean".split())
 
+def merge_to(src, dest):
+    for key, val in src.items():
+        if type(val) is dict:
+            if key in dest:
+                dest[key] |= val
+            else:
+                dest[key] = val
+        elif type(val) is list:
+            if key in dest:
+                dest[key] += val
+            else:
+                dest[key] = val
+        else:
+            print(type(val))
+            assert False
+
+def rewrite_cargo_toml(tests):
+    cml = toml.load("Cargo.toml")
+    cmlt = toml.load(tests / "Cargo.toml")
+    merge_to(cmlt, cml)
+    os.rename("Cargo.toml", "Cargo.toml.orig")
+    toml.dump(cml, open("Cargo.toml", "w"))
+
+def run_grading_tests(tests):
+    if not Path("Cargo.toml.orig").is_file():
+        auxtests = Path(tests)
+        shutil.copy(auxtests / Path("grading-tests.rs"), ".")
+        rewrite_cargo_toml(auxtests)
+    round(
+        "cargo test (grading-tests)",
+        "cargo test -- -Zunstable-options --format=json --report-time",
+        filtered=run_tests,
+    )
+
 clean()
 round("rustfmt", "cargo fmt -- --check")
 round("clippy", "cargo clippy -q -- -D warnings")
-if args.tests:
-    auxtests = Path(args.tests)
-    testsdir = Path("tests")
-    testsdir.mkdir(mode=0o700, exist_ok=True)
-    test_target = testsdir / Path("grading-tests.rs")
-    if test_target.exists():
-        print(f"{test_target}: exists, not overwriting")
-    else:
-        shutil.copy(auxtests, test_target)
 round(
     "cargo test",
     "cargo test -- -Zunstable-options --format=json --report-time",
     filtered=run_tests,
 )
+if args.tests:
+    run_grading_tests(args.tests)
 clean()

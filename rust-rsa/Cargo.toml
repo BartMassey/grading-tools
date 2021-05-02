@@ -1,0 +1,6 @@
+[dev-dependencies]
+rand = "*"
+
+[[test]]
+name = "grading-tests"
+path = "grading-tests.rs"

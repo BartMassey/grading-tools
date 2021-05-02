@@ -9,4 +9,7 @@ from Moodle.
 
 * `rust-modexp/`: Checkers for Rust `modexp` homework.
 * `sound-clipped/`: Checkers for Sound `clipped` homework.
-* `grade-rust.py/`: General sanity checker for Rust crates.
+* `grade-rust.py`: General sanity checker for Rust crates.
+
+Note that `grade-rust.py` will potentially edit the Rust
+project directory that it is run in to add tests.
