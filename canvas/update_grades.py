@@ -4,7 +4,6 @@ from pathlib import Path
 from prettytable import PrettyTable
 
 import argparse, csv, os
-import prettytable
 import toml
 
 

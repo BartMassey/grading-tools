@@ -7,6 +7,7 @@ and projects in my courses. The repository
 tools for dealing with downloading and uploading assignments
 from Moodle.
 
+* `canvas/`: Tools for grading Canvas assignments.
 * `rust-modexp/`: Checkers for Rust `modexp` homework.
 * `sound-clipped/`: Checkers for Sound `clipped` homework.
 * `grade-rust.py`: General sanity checker for Rust crates.
