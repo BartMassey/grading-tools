@@ -7,16 +7,22 @@ import subprocess
 def clean():
     subprocess.run("cargo clean".split())
 
-def test(*args, expect=None):
+def test(*args, expect=None, expect_fail=False):
     cmd = "cargo run --".split()
     cmd += map(lambda i: str(i), args)
     cmdstr = ' '.join(cmd)
+
     print("*", cmdstr)
+
     result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
+
+    fail = result.returncode != 0
+    if fail != expect_fail:
         print("*", cmdstr, "failed")
         print(result.stderr, end="")
+
     outputs = result.stdout.splitlines()
+
     if expect is not None:
         if len(outputs) == 0:
             print(f"* no output (expected {expect})")
@@ -35,6 +41,7 @@ def test(*args, expect=None):
             if not printed:
                 print(result.stdout, end="")
 
+# tests which are expected to succeed
 tests = [
     ((2, 20, 17), 16),
     ((65045062, 3346591621, 2050983529), 779460057),
@@ -49,6 +56,19 @@ tests = [
     ((1743817115, 450929719, 3730619216), 1552068307),
 ]
 
+# tests which are expected to fail
+negative_tests = [
+    (2, 4, 8),
+    (-1, 0, 8),
+    (0, 0, -1),
+    (2, 4, 2**64),
+    (2**64, 4, 8),
+]
+
 for i, o in tests:
     test(*i, expect=o)
+
+for i in negative_tests:
+    test(*i, expect_fail=True)
+
 clean()
