@@ -66,7 +66,7 @@ def prepare_submission(sub_dir, assignment):
     # this might IndexError, but we'll take the risk
     parts = sub_dir.resolve().name.split("_")
     student_name = parts[0]
-    student_id = int(parts[1])
+    student_id = int(parts[2] if parts[1] == "LATE" else parts[1])
 
     # write grading.toml
     with open(sub_dir / "grading.toml", "w") as grading_file:
