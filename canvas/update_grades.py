@@ -40,14 +40,13 @@ def main():
 def find_grades(submissions_path, assignment):
     grades = dict()
     for grading_path in submissions_path.rglob("grading.toml"):
-        with open(grading_path, "r") as csv_file:
-            data = toml.loads(csv_file.read())
+        data = toml.load(grading_path)
 
-            if assignment not in data["grades"]:
-                continue
+        if assignment not in data["grades"]:
+            continue
 
-            student_id = data["student"]["id"]
-            grades[student_id] = data
+        student_id = data["student"]["id"]
+        grades[student_id] = data
     return grades
 
 
@@ -56,7 +55,8 @@ def merge_grades(old_gradebook, new_gradebook):
     for id, new_record in new_gradebook.items():
         old_record = gradebook[id]
         for key in new_record:
-            old_record[key] = {**old_record[key], **new_record[key]}
+            if type(new_record[key]) is dict:
+                old_record[key] = {**old_record[key], **new_record[key]}
     return gradebook
 
 

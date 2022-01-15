@@ -27,7 +27,7 @@ def main():
     ap.add_argument("--rust", action="store_true", help="Fix Cargo issues")
     args = ap.parse_args()
 
-    unzip_submissions(Path(args.archive), args.assignment, args.out)
+    unzip_submissions(Path(args.archive), args.assignment, args.out, args.rust)
 
 
 def unzip_submissions(path, assignment, out_dir=None, rust=False):
@@ -39,13 +39,14 @@ def unzip_submissions(path, assignment, out_dir=None, rust=False):
         if os.path.isdir(path):
             continue
 
-        if filename.endswith(".zip"):
-            sub_dir = unzip(path, remove=True)
-            prepare_submission(sub_dir, assignment)
-            if rust:
-                prepare_cargo_project(sub_dir)
-        else:
+        if not filename.endswith(".zip"):
             print(f'warning: File "{filename}" does not appear to be a zip')
+            continue
+
+        sub_dir = unzip(path, remove=True)
+        prepare_submission(sub_dir, assignment)
+        if rust:
+            prepare_cargo_project(sub_dir)
 
 
 def unzip(path, out_dir=None, remove=False):
@@ -62,22 +63,28 @@ def unzip(path, out_dir=None, remove=False):
 
 
 def prepare_submission(sub_dir, assignment):
-    # infer student name and ID from submission directory
-    # this might IndexError, but we'll take the risk
-    parts = sub_dir.resolve().name.split("_")
-    student_name = parts[0]
-    student_id = int(parts[2] if parts[1] == "LATE" else parts[1])
+    # try to infer student name and ID from submission directory
+    name = sub_dir.resolve().name
+    parts = name.split("_")
+    try:
+        student_name = parts[0]
+        student_id = int(parts[2] if parts[1] == "LATE" else parts[1])
+    except IndexError:
+        print(f"warning: could not parse student name and ID from submission: {name}")
+        return
 
     # write grading.toml
     with open(sub_dir / "grading.toml", "w") as grading_file:
-        data = {
+        info = {
             "student": {"id": student_id, "short_name": student_name},
             "grades": {assignment: 0.0},
         }
-        print(toml.dumps(data), file=grading_file, end="")
+        print(toml.dumps(info), file=grading_file, end="")
 
     # touch grading_comments.txt
     Path(sub_dir / "grading_comments.txt").touch()
+
+    return info
 
 
 def prepare_cargo_project(sub_dir):
