@@ -5,11 +5,14 @@
 import random, sys
 
 def bigrand():
-    return random.randrange(1, 1 << 32)
+    return random.randrange(1, 1 << 64)
 
 for _ in range(int(sys.argv[1])):
     b = bigrand()
     e = bigrand()
     m = bigrand()
     x = pow(b, e, m)
-    print(f"(({b}, {e}, {m}), {x}),")
+    print("    (")
+    print(f"        ({b}, {e}, {m}),")
+    print(f"        {x},")
+    print("    ),")

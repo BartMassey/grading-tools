@@ -33,7 +33,7 @@ def run_tests(cmd):
                 print(record["stdout"], end="")
     return result
 
-def round(name, cmd, filtered=None):
+def test_round(name, cmd, filtered=None):
     print(f"* checking {name}")
     cmd = cmd.split()
     if filtered is None:
@@ -78,7 +78,7 @@ def run_grading_tests(tests):
         auxtests = Path(tests)
         shutil.copy(auxtests / Path("grading-tests.rs"), ".")
         rewrite_cargo_toml(auxtests)
-    round(
+    test_round(
         "cargo test (grading-tests)",
         "cargo test -- -Zunstable-options --format=json --report-time",
         filtered=run_tests,
@@ -112,17 +112,23 @@ def git_commit(message):
     index.write()
 
 clean()
+
 if args.commit:
     git_commit('student homework assignment')
-round("rustfmt", "cargo fmt -- --check")
-round("clippy", "cargo clippy -q -- -D warnings")
-round(
+
+test_round("rustfmt", "cargo fmt -- --check")
+test_round("clippy", "cargo clippy -q -- -D warnings")
+test_round(
     "cargo test",
     "cargo test -- -Zunstable-options --format=json --report-time",
     filtered=run_tests,
 )
+
 if args.tests:
-    run_grading_tests(args.tests)
+    tests_dir = Path(sys.argv[0]).parent
+    run_grading_tests(tests_dir / args.tests)
+
 if args.commit:
     git_commit('added grading stuff')
+
 clean()

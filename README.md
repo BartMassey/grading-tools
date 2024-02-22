@@ -9,6 +9,7 @@ from Moodle.
 
 * `canvas/`: Tools for grading Canvas assignments.
 * `rust-modexp/`: Checkers for Rust `modexp` homework.
+* `rust-rsa/`: Checkers for Rust `rsa` homework.
 * `sound-clipped/`: Checkers for Sound `clipped` homework.
 * `grade-rust.py`: General sanity checker for Rust crates.
 
@@ -16,9 +17,11 @@ from Moodle.
 
 Use
 
-    python3 <grading-tools>/grade-rust.py -t <grading-tools>/rust-rsa
+    python3 <grading-tools>/grade-rust.py -t <checker>
 
-where `<grading-tools>` is the path to this repo.
+where `<grading-tools>` is the path to this repo and
+checker is the name of the directory in this repo where the
+checker for the given assignment lives.
 
 Note that `grade-rust.py` will potentially edit the Rust
 project directory that it is run in to add tests. Use the
