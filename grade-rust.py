@@ -19,7 +19,17 @@ ap.add_argument(
     help = "run cargo test",
     action = "store_true",
 )
+ap.add_argument(
+    "cargo_flags",
+    help = "additional flags for cargo",
+    nargs = "*",
+)
 args = ap.parse_args()
+
+def cargo_flags():
+    if args.cargo_flags:
+        return ' '.join(args.cargo_flags)
+    return ""
 
 def run_tests(cmd):
     result = subprocess.run(
@@ -85,7 +95,7 @@ def run_grading_tests(tests):
         rewrite_cargo_toml(auxtests)
     test_round(
         "cargo test (grading-tests)",
-        "cargo test -- -Zunstable-options --format=json --report-time",
+        f"cargo test {cargo_flags()} -- -Zunstable-options --format=json --report-time",
         filtered=run_tests,
     )
 
@@ -122,7 +132,7 @@ if args.commit:
     git_commit('student homework assignment')
 
 test_round("rustfmt", "cargo fmt -- --check")
-test_round("clippy", "cargo clippy -q -- -D warnings")
+test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
 if args.do_tests:
     test_round(
         "cargo test",
