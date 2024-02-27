@@ -14,6 +14,11 @@ ap.add_argument(
     help = "make a git repo and commit before editing student work",
     action = "store_true",
 )
+ap.add_argument(
+    "-T", "--do-tests",
+    help = "run cargo test",
+    action = "store_true",
+)
 args = ap.parse_args()
 
 def run_tests(cmd):
@@ -118,11 +123,12 @@ if args.commit:
 
 test_round("rustfmt", "cargo fmt -- --check")
 test_round("clippy", "cargo clippy -q -- -D warnings")
-test_round(
-    "cargo test",
-    "cargo test -- -Zunstable-options --format=json --report-time",
-    filtered=run_tests,
-)
+if args.do_tests:
+    test_round(
+        "cargo test",
+        "cargo test -- -Zunstable-options --format=json --report-time",
+        filtered=run_tests,
+    )
 
 if args.tests:
     tests_dir = Path(sys.argv[0]).parent
