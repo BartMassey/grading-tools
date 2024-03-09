@@ -17,13 +17,21 @@ from Moodle.
 
 Use
 
-    python3 <grading-tools>/grade-rust.py -t <checker>
+    python3 <grading-tools>/grade-rust.py
 
 where `<grading-tools>` is the path to this repo and
 checker is the name of the directory in this repo where the
 checker for the given assignment lives.
 
-Note that `grade-rust.py` will potentially edit the Rust
-project directory that it is run in to add tests. Use the
-`-c` flag to `grade-rust.py` to have the student work
-git-committed before and after these edits.
+Use `--help` to see the available options.
+
+* Student-supplied tests are *not* run by default:
+  use the `-T` flag for that.
+
+* You may supply your own tests with the `-t` flag, whose
+  argument is a path to your `tests/`
+  directory. `grade-rust.py` will potentially edit the Rust
+  project directory that it is run in to add your tests.
+  Use the `-c` flag to `grade-rust.py` to have the student
+  work git-committed before and after these edits, so that
+  you can get the original back.
