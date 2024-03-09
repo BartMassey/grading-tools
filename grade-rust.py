@@ -20,43 +20,66 @@ ap.add_argument(
     action = "store_true",
 )
 ap.add_argument(
+    "-l", "--error-logfile",
+    help = "file to log any clippy, rustfmt, test errors",
+)
+ap.add_argument(
     "cargo_flags",
     help = "additional flags for cargo",
     nargs = "*",
 )
 args = ap.parse_args()
 
+logfile = None
+def log_message(message):
+    global logfile
+    if not args.error_logfile:
+        return
+    if not logfile:
+        logfile = open(args.error_logfile, "w")
+    print(message, file=logfile)
+
 def cargo_flags():
     if args.cargo_flags:
         return ' '.join(args.cargo_flags)
     return ""
 
-def run_tests(cmd):
+def run_cmd(cmd):
     result = subprocess.run(
-        cmd,
+        cmd.split(),
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
         encoding="utf-8",
     )
-    if result.returncode != 0:
-        for line in result.stdout.split("\n"):
-            if line.strip() == "":
-                continue
-            record = json.loads(line)
-            if record["type"] == "test" and record["event"] == "failed":
-                print(f'test failed: {record["name"]}')
-                print(record["stdout"], end="")
-    return result
+    if not result:
+        return None
+    return str(result.stdout)
+
+def run_tests(cmd):
+    result = run_cmd(cmd)
+    if not result:
+        return None
+    messages = ""
+    for line in result.stdout.split("\n"):
+        if line.strip() == "":
+            continue
+        record = json.loads(line)
+        if record["type"] == "test" and record["event"] == "failed":
+            messages += f'test failed: {record["name"]}\n'
+            messages += record["stdout"]
+    return messages
 
 def test_round(name, cmd, filtered=None):
     print(f"* checking {name}")
-    cmd = cmd.split()
     if filtered is None:
-        result = subprocess.run(cmd)
+        result = run_cmd(cmd)
     else:
         result = filtered(cmd)
-    if result.returncode != 0:
-        print(f"* {name} check failed")
+    if result:
+        message = f"* {name} failed\n"
+        message += result
+        print(message, file=sys.stdout)
+        log_message(message)
 
 def clean():
     subprocess.run("cargo clean".split())
