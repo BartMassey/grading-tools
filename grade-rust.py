@@ -89,7 +89,7 @@ def test_round(name, cmd, filtered=None):
     return True
 
 def clean():
-    subprocess.run("cargo clean".split())
+    subprocess.run("cargo clean -q".split())
 
 def merge_to(src, dest):
     for key, val in src.items():
@@ -157,6 +157,12 @@ def git_commit(message):
     index.write()
 
 def grade_cwd():
+
+    target_dir = Path("target")
+    if target_dir.is_dir():
+        message = '* target directory in submission'
+        print(message)
+        log_message(message)
     clean()
 
     if args.commit:
