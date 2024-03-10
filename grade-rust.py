@@ -179,7 +179,7 @@ def grade_cwd():
     clean()
 
 if args.batch:
-    for subdir in Path(".").iterdir():
+    for subdir in sorted(list(Path(".").iterdir())):
         logfile = None
         if not (subdir / "Cargo.toml").exists():
             continue
