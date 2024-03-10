@@ -80,11 +80,13 @@ def test_round(name, cmd, filtered=None):
         result = run_cmd(cmd)
     else:
         result = filtered(cmd)
-    if result:
+    if result is not None:
         message = f"* {name} failed\n"
         message += result
         print(message, file=sys.stdout)
         log_message(message)
+        return False
+    return True
 
 def clean():
     subprocess.run("cargo clean".split())
@@ -160,18 +162,22 @@ def grade_cwd():
     if args.commit:
         git_commit('student homework assignment')
 
-    test_round("rustfmt", "cargo fmt -- --check")
-    test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
-    if args.do_tests:
-        test_round(
-            "cargo test",
-            "cargo test -- -Zunstable-options --format=json --report-time",
-            filtered=run_tests,
-        )
+    built = test_round("compile", 'cargo check')
+    if built:
+        built_clean = test_round("warnings", 'cargo rustc -- -D warnings')
+        if built_clean:
+            test_round("rustfmt", "cargo fmt -- --check")
+            test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
+            if args.do_tests:
+                test_round(
+                    "cargo test",
+                    "cargo test -- -Zunstable-options --format=json --report-time",
+                    filtered=run_tests,
+                )
 
-    if args.tests:
-        tests_dir = Path(sys.argv[0]).parent
-        run_grading_tests(tests_dir / args.tests)
+        if args.tests:
+            tests_dir = Path(sys.argv[0]).parent
+            run_grading_tests(tests_dir / args.tests)
 
     if args.commit:
         git_commit('added grading stuff')
