@@ -54,9 +54,15 @@ def cargo_flags():
         return ' '.join(args.cargo_flags)
     return ""
 
-def run_cmd(cmd):
+def run_cmd(cmd, env = None):
+    run_env = None
+    if env:
+        run_env = dict(os.environ)
+        run_env.update(env)
+    
     result = subprocess.run(
         cmd.split(),
+        env = run_env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         encoding="utf-8",
@@ -65,8 +71,8 @@ def run_cmd(cmd):
         return None
     return str(result.stdout)
 
-def run_tests(cmd):
-    result = run_cmd(cmd)
+def run_tests(cmd, env=None):
+    result = run_cmd(cmd, env)
     if not result:
         return None
     messages = ""
@@ -79,12 +85,12 @@ def run_tests(cmd):
             messages += record["stdout"]
     return messages
 
-def test_round(name, cmd, filtered=None):
+def test_round(name, cmd, filtered=None, env=None):
     print(f"* checking {name}")
     if filtered is None:
-        result = run_cmd(cmd)
+        result = run_cmd(cmd, env=env)
     else:
-        result = filtered(cmd)
+        result = filtered(cmd, env=env)
     if result is not None:
         message = f"* {name} failed\n"
         message += result
@@ -192,7 +198,11 @@ def grade_cwd():
 
     built = test_round("compile", 'cargo check')
     if built:
-        built_clean = test_round("warnings", 'cargo rustc -- -D warnings')
+        built_clean = test_round(
+            "warnings",
+            'cargo check',
+            env={'RUSTFLAGS': '-D warnings'},
+        )
         if built_clean:
             test_round("rustfmt", "cargo fmt -- --check")
             test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
