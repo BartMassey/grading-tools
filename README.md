@@ -2,15 +2,21 @@
 Bart Massey 2021
 
 This repo contains miscellaneous tools for grading specific homeworks
-and projects in my courses. The repository
-[moodle-hw](http://github.com/BartMassey/moodle-hw) contains
-tools for dealing with downloading and uploading assignments
-from Moodle.
+and projects in my courses.
 
-* `canvas/`: Tools for grading Canvas assignments.
+* The repository
+  [canvas-hw](http://github.com/BartMassey/canvas-hw)
+  contains tools for dealing with downloading and uploading
+  assignments from Canvas.
+
+* The repository
+  [moodle-hw](http://github.com/BartMassey/moodle-hw)
+  contains tools for dealing with downloading and uploading
+  assignments from Moodle.
+
 * `rust-modexp/`: Checkers for Rust `modexp` homework.
 * `rust-rsa/`: Checkers for Rust `rsa` homework.
-* `sound-clipped/`: Checkers for Sound `clipped` homework.
+* `sound-clip/`: Checkers for Sound `clip` homework.
 * `grade-rust.py`: General sanity checker for Rust crates.
 * `fixcaps.py`: Clean up MS-DOS type pathname capitalization
   on a directory tree.
