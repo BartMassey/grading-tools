@@ -196,11 +196,11 @@ def grade_cwd():
     if args.commit:
         git_commit('student homework assignment')
 
-    built = test_round("compile", 'cargo check')
+    built = test_round("compile", 'cargo check -q')
     if built:
         built_clean = test_round(
             "warnings",
-            'cargo check',
+            'cargo check -q',
             env={'RUSTFLAGS': '-D warnings'},
         )
         if built_clean:
