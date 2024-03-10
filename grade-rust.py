@@ -24,6 +24,11 @@ ap.add_argument(
     help = "file to log any clippy, rustfmt, test errors",
 )
 ap.add_argument(
+    "-b", "--batch",
+    help = "run on all subdirectories of cwd that have Cargo.toml",
+    action = "store_true",
+)
+ap.add_argument(
     "cargo_flags",
     help = "additional flags for cargo",
     nargs = "*",
@@ -149,25 +154,38 @@ def git_commit(message):
     )
     index.write()
 
-clean()
+def grade_cwd():
+    clean()
 
-if args.commit:
-    git_commit('student homework assignment')
+    if args.commit:
+        git_commit('student homework assignment')
 
-test_round("rustfmt", "cargo fmt -- --check")
-test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
-if args.do_tests:
-    test_round(
-        "cargo test",
-        "cargo test -- -Zunstable-options --format=json --report-time",
-        filtered=run_tests,
-    )
+    test_round("rustfmt", "cargo fmt -- --check")
+    test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
+    if args.do_tests:
+        test_round(
+            "cargo test",
+            "cargo test -- -Zunstable-options --format=json --report-time",
+            filtered=run_tests,
+        )
 
-if args.tests:
-    tests_dir = Path(sys.argv[0]).parent
-    run_grading_tests(tests_dir / args.tests)
+    if args.tests:
+        tests_dir = Path(sys.argv[0]).parent
+        run_grading_tests(tests_dir / args.tests)
 
-if args.commit:
-    git_commit('added grading stuff')
+    if args.commit:
+        git_commit('added grading stuff')
 
-clean()
+    clean()
+
+if args.batch:
+    for subdir in Path(".").iterdir():
+        logfile = None
+        if not (subdir / "Cargo.toml").exists():
+            continue
+        print(f"batch grading: subdir {subdir}")
+        os.chdir(subdir)
+        grade_cwd()
+        os.chdir("..")
+else:
+    grade_cwd()

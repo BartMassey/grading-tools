@@ -25,6 +25,11 @@ checker for the given assignment lives.
 
 Use `--help` to see the available options.
 
+* The `-b` flag, when used in the directory containing all
+  submissions, allows testing all submissions while grabbing
+  a cup of beverage. Use with `-l` so that failures are
+  recorded. Can recommend.
+
 * Student-supplied tests are *not* run by default:
   use the `-T` flag for that.
 
