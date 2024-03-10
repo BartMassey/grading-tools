@@ -53,10 +53,10 @@ def run_cmd(cmd):
     result = subprocess.run(
         cmd.split(),
         stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
         encoding="utf-8",
     )
-    if not result:
+    if result.returncode == 0:
         return None
     return str(result.stdout)
 
