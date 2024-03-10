@@ -12,6 +12,8 @@ from Moodle.
 * `rust-rsa/`: Checkers for Rust `rsa` homework.
 * `sound-clipped/`: Checkers for Sound `clipped` homework.
 * `grade-rust.py`: General sanity checker for Rust crates.
+* `fixcaps.py`: Clean up MS-DOS type pathname capitalization
+  on a directory tree.
 
 ## Grading Rust Programs
 
