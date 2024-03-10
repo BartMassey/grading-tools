@@ -29,6 +29,11 @@ ap.add_argument(
     action = "store_true",
 )
 ap.add_argument(
+    "--ignore-package-type",
+    help = "do not do checks dependent on lib vs binary crate heuristic",
+    action = "store_true",
+)
+ap.add_argument(
     "cargo_flags",
     help = "additional flags for cargo",
     nargs = "*",
@@ -157,6 +162,10 @@ def git_commit(message):
     index.write()
 
 def grade_cwd():
+    cargo_lock = Path('Cargo.lock')
+    has_cargo_lock = False
+    if cargo_lock.is_file():
+        has_cargo_lock = True
 
     target_dir = Path("target")
     if target_dir.is_dir():
@@ -164,6 +173,19 @@ def grade_cwd():
         print(message)
         log_message(message)
     clean()
+
+    if not args.ignore_package_type:
+        src = Path('src')
+        if (src / 'main.rs').is_file():
+            if not has_cargo_lock:
+                message = '* no Cargo.lock in bin crate submission'
+                print(message)
+                log_message(message)
+        elif (src / 'lib.rs').is_file():
+            if has_cargo_lock:
+                message = '* Cargo.lock in lib crate submission'
+                print(message)
+                log_message(message)
 
     if args.commit:
         git_commit('student homework assignment')
@@ -189,6 +211,8 @@ def grade_cwd():
         git_commit('added grading stuff')
 
     clean()
+    if not has_cargo_lock:
+        cargo_lock.unlink()
 
 if args.batch:
     for subdir in sorted(list(Path(".").iterdir())):
