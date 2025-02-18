@@ -10,6 +10,10 @@ ap.add_argument(
     help = "file of tests to run with student's assignment",
 )
 ap.add_argument(
+    "-s", "--script",
+    help = "directory containing check.py script to run on student's assignment",
+)
+ap.add_argument(
     "-c", "--commit",
     help = "make a git repo and commit before editing student work",
     action = "store_true",
@@ -76,10 +80,11 @@ def run_tests(cmd, env=None):
     if not result:
         return None
     messages = ""
-    for line in result.stdout.split("\n"):
-        if line.strip() == "":
+    for line in result.split("\n"):
+        l = line.strip()
+        if l == "" or l[0] != "{":
             continue
-        record = json.loads(line)
+        record = json.loads(l)
         if record["type"] == "test" and record["event"] == "failed":
             messages += f'test failed: {record["name"]}\n'
             messages += record["stdout"]
@@ -136,10 +141,15 @@ def run_grading_tests(tests):
         rewrite_cargo_toml(auxtests)
     test_round(
         "cargo test (grading-tests)",
-        f"cargo test {cargo_flags()} -- -Zunstable-options --format=json --report-time",
+        f"cargo +nightly test {cargo_flags()} -- -Zunstable-options --format=json --report-time",
         filtered=run_tests,
     )
 
+def run_grading_script(script):
+    test_round(
+        "grading test python script",
+        f"python {script}",
+    )
 
 def git_commit(message):
     repo_path = pygit2.discover_repository(os.getcwd())
@@ -204,18 +214,22 @@ def grade_cwd():
             env={'RUSTFLAGS': '-D warnings'},
         )
         if built_clean:
-            test_round("rustfmt", "cargo fmt -- --check")
+            test_round("rustfmt", "cargo fmt -- --check --color=never")
             test_round("clippy", f"cargo clippy -q {cargo_flags()} -- -D warnings")
             if args.do_tests:
                 test_round(
                     "cargo test",
-                    "cargo test -- -Zunstable-options --format=json --report-time",
+                    "cargo +nightly test -- -Zunstable-options --format=json --report-time",
                     filtered=run_tests,
                 )
 
         if args.tests:
             tests_dir = Path(sys.argv[0]).parent
             run_grading_tests(tests_dir / args.tests)
+
+        if args.script:
+            tests_dir = Path(sys.argv[0]).parent
+            run_grading_script(tests_dir / args.script / "check.py")
 
     if args.commit:
         git_commit('added grading stuff')
