@@ -197,11 +197,6 @@ def grade_cwd():
                 message = '* no Cargo.lock in bin crate submission'
                 print(message)
                 log_message(message)
-        elif (src / 'lib.rs').is_file():
-            if has_cargo_lock:
-                message = '* Cargo.lock in lib crate submission'
-                print(message)
-                log_message(message)
 
     if args.commit:
         git_commit('student homework assignment')
