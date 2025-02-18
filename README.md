@@ -16,6 +16,8 @@ and projects in my courses.
 
 * `rust-modexp/`: Checkers for Rust `modexp` homework.
 * `rust-rsa/`: Checkers for Rust `rsa` homework.
+* `rust-rule110`: Checkers for Rust `rule-110` homework.
+* `rust-bbow`: Checkers for Rust `bbow` homework.
 * `sound-clip/`: Checkers for Sound `clip` homework.
 * `grade-rust.py`: General sanity checker for Rust crates.
 * `fixcaps.py`: Clean up MS-DOS type pathname capitalization
