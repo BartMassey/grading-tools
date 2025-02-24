@@ -49,7 +49,7 @@ fn test_search_short() {
         (2, "sons"),
     ];
     for &(count, word) in match_counts {
-        assert_eq!(count, short.match_count(word));
+        assert_eq!(count, short.match_count(word), "{}", word);
     }
 }
 
@@ -63,6 +63,6 @@ fn test_double_extend_words() {
     assert_eq!(words, vec!["hello", "war", "world"]);
     let match_counts = &[(1, "hello"), (1, "war"), (2, "world")];
     for &(count, word) in match_counts {
-        assert_eq!(count, tiny.match_count(word));
+        assert_eq!(count, tiny.match_count(word), "{}", word);
     }
 }
