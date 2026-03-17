@@ -33,6 +33,11 @@ ap.add_argument(
     action = "store_true",
 )
 ap.add_argument(
+    "-g", "--git",
+    help = "submission is git repo",
+    action = "store_true",
+)
+ap.add_argument(
     "--ignore-package-type",
     help = "do not do checks dependent on lib vs binary crate heuristic",
     action = "store_true",
@@ -177,6 +182,16 @@ def git_commit(message):
     )
     index.write()
 
+# https://github.com/libgit2/pygit2/issues/244#issuecomment-18499987
+def git_files_contain_target():
+    r = pygit2.Repository('.')
+    try:
+        t = repo.revparse_single('main').tree
+        return any(e.name == "target" for e in t)
+    except:
+        print("repo structure error", file=sys.stdout)
+        return False
+
 def grade_cwd():
     cargo_lock = Path('Cargo.lock')
     has_cargo_lock = False
@@ -184,7 +199,7 @@ def grade_cwd():
         has_cargo_lock = True
 
     target_dir = Path("target")
-    if target_dir.is_dir():
+    if target_dir.is_dir() and (not args.git or git_files_contain_target()):
         message = '* target directory in submission'
         print(message)
         log_message(message)
